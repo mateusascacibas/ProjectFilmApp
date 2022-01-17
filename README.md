@@ -1,16 +1,7 @@
-# filmproject
+# Filme de Hoje?
 
-Flutter project film
+Flutter Projeto 'Filme de Hoje?'
 
-## Getting Started
+## Projeto
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+ O aplicativo tem como intuito realizar o sorteio de filmes, com base na lista que você mesmo adicionar, recomendado para casais que pretendem assistir um filme juntos, ou para amigos que pretendem assistir um filme e cada um quer assistir um diferente.
