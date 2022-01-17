@@ -1,6 +1,7 @@
 
 
 import 'package:filmproject/widgets/button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:sqflite/sqflite.dart';
@@ -33,6 +34,7 @@ class _HomePageState extends State<HomePage> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+
         appBar: AppBar(
           title: Text("Filme de Hoje"),
           bottom: TabBar(
@@ -62,24 +64,25 @@ class _HomePageState extends State<HomePage> {
                     context: context,
                     builder: (BuildContext context) {
                       return Container(
-                        height: 200,
+                        height: MediaQuery.of(context).size.height * 0.6,
                         color: Colors.lightBlueAccent,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Text(
-                                "Digite o filme a ser adicionado: ",
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              _widgetTextField(),
-                              ElevatedButton(
-                                  child: const Text('Adicione'),
-                                  onPressed: () => _onClickAdd(context)),
-                            ],
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 15),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text(
+                                  "Digite o filme a ser adicionado: ",
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                ),
+                                _widgetTextField(),
+                                ElevatedButton(
+                                    child: const Text('Adicione'),
+                                    onPressed: () => _onClickAdd(context)),
+                              ],
+                            ),
                           ),
-                        ),
                       );
                     });
               },
@@ -183,9 +186,41 @@ class _HomePageState extends State<HomePage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text("Removido com sucesso!."),
+            title: Text("Removido com sucesso!"),
           );
         });
+    _reloadList();
+  }
+
+  _onClickEdit(int index) async {
+    SharedPreferences listPrefs = await SharedPreferences.getInstance();
+    myController.text = this.listFilm[index];
+    showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.6,
+            color: Colors.lightBlueAccent,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      "Digite o nome do filme: ",
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    _widgetTextField(),
+                    ElevatedButton(
+                        child: const Text('Edite'),
+                        onPressed: () => _editCounter(index)),
+                  ],
+                ),
+              ),
+          );
+        });
+      _reloadList();
   }
 
   _removeCounter(int index) async {
@@ -193,7 +228,34 @@ class _HomePageState extends State<HomePage> {
     this.listFilm.removeAt(index);
     var listFilmString = listFilm.cast<String>();
     listPrefs.setStringList('counter', listFilmString);
+  }
 
+  _editCounter(int index) async {
+    if(myController.text == ""){
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Por favor, preencha alguma coisa!"),
+            );
+          });
+    }
+      else {
+      SharedPreferences listPrefs = await SharedPreferences.getInstance();
+      this.listFilm[index] = myController.text;
+      var listFilmString = listFilm.cast<String>();
+      listPrefs.setStringList('counter', listFilmString);
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Edição concluida com sucesso!"),
+            );
+          });
+      myController.text = "";
+    }
   }
 
   _incrementCounter(String name) async {
@@ -208,26 +270,38 @@ class _HomePageState extends State<HomePage> {
 
   //Metodo que chama o "add", colocando um novo filme na lista
   _onClickAdd(BuildContext context) {
-    var sizeList = listFilm.length;
-    // this.listFilm.insert(sizeList, myController.text);
-    _incrementCounter(myController.text);
-    // print("Lista do flutter: " + _getCounter());
-    myController.text = "";
-    Navigator.pop(context);
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("Adicionado com sucesso!"),
-          );
-        });
+    if(myController.text == ""){
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Por favor, preencha alguma coisa!"),
+            );
+          });
+    }
+    else{
+      var sizeList = listFilm.length;
+      // this.listFilm.insert(sizeList, myController.text);
+      _incrementCounter(myController.text);
+      // print("Lista do flutter: " + _getCounter());
+      myController.text = "";
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Adicionado com sucesso!"),
+            );
+          });
+      _reloadList();
+    }
   }
-
-
 
   _initList() async{
     SharedPreferences listPrefs = await SharedPreferences.getInstance();
     this.listFilm = listPrefs.getStringList("counter")!.cast<dynamic>();
+    _reloadList();
 
   }
 
@@ -317,12 +391,25 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          new IconButton(
-              icon: Icon(Icons.delete_forever),
-              iconSize: 30.0,
-              onPressed: () => _onClickRemove(index),
-              padding: EdgeInsets.only(left: 310.0)
-          ),
+          SizedBox(
+              child: Row(
+                children: [
+                  IconButton(
+                      icon: Icon(Icons.edit),
+                      iconSize: 30.0,
+                      onPressed: () => _onClickEdit(index),
+                      padding: EdgeInsets.only(left: 280.0)
+                  ),
+                  IconButton(
+                      icon: Icon(Icons.delete_forever),
+                      iconSize: 30.0,
+                      onPressed: () => _onClickRemove(index),
+                      padding: EdgeInsets.only(left: 10.0)
+                  ),
+
+                ],
+              ),
+            ),
 
         ],
       );
