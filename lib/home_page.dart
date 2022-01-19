@@ -1,10 +1,12 @@
 
 
+import 'package:filmproject/movie_page.dart';
 import 'package:filmproject/widgets/button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:sqflite/sqflite.dart';
+import 'controllers/movie_popular.dart';
 
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     listFilmPage(context, this.listFilm);
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
 
         appBar: AppBar(
@@ -42,7 +44,9 @@ class _HomePageState extends State<HomePage> {
               Tab(
                 text: "Sorteio",
               ),
-              Tab(text: "Lista")
+              Tab(text: "Lista"),
+              Tab(text: "Populares"),
+
             ],
           ),
         ),
@@ -50,6 +54,7 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             _body(context),
             listFilmPage(context,this.listFilm),
+            MoviePage(),
             //_tab2(),
           ],
         ),
@@ -240,8 +245,17 @@ class _HomePageState extends State<HomePage> {
               title: Text("Por favor, preencha alguma coisa!"),
             );
           });
+    }else if(this.listFilm.contains(myController.text)){
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Não podemos ter o mesmo filmes 2 vezes na lista!"),
+            );
+          });
     }
-      else {
+    else {
       SharedPreferences listPrefs = await SharedPreferences.getInstance();
       this.listFilm[index] = myController.text;
       var listFilmString = listFilm.cast<String>();
@@ -254,8 +268,9 @@ class _HomePageState extends State<HomePage> {
               title: Text("Edição concluida com sucesso!"),
             );
           });
-      myController.text = "";
+
     }
+    myController.text = "";
   }
 
   _incrementCounter(String name) async {
@@ -279,13 +294,21 @@ class _HomePageState extends State<HomePage> {
               title: Text("Por favor, preencha alguma coisa!"),
             );
           });
+    }else if(this.listFilm.contains(myController.text)){
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Não podemos ter o mesmo filmes 2 vezes na lista!"),
+            );
+          });
     }
     else{
       var sizeList = listFilm.length;
       // this.listFilm.insert(sizeList, myController.text);
       _incrementCounter(myController.text);
       // print("Lista do flutter: " + _getCounter());
-      myController.text = "";
       Navigator.pop(context);
       showDialog(
           context: context,
@@ -296,6 +319,7 @@ class _HomePageState extends State<HomePage> {
           });
       _reloadList();
     }
+    myController.text = "";
   }
 
   _initList() async{
