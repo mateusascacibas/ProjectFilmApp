@@ -1,4 +1,5 @@
 import 'package:filmproject/controllers/movie_detail_controller.dart';
+import 'package:filmproject/controllers/serie_detail_controller.dart';
 import 'package:filmproject/widgets/button.dart';
 import 'package:filmproject/widgets/centered_message.dart';
 import 'package:filmproject/widgets/movie_card.dart';
@@ -10,18 +11,18 @@ import 'widgets/centered_progress.dart';
 import 'controllers/movie_popular.dart';
 import 'widgets/chip_date.dart';
 
-class MovieDetailPage extends StatefulWidget{
-  final int movieId;
-  MovieDetailPage(this.movieId);
+class SerieDetailPage extends StatefulWidget{
+  final int serieID;
+  SerieDetailPage(this.serieID);
 
   @override
-  _MovieDetailPageState createState() => _MovieDetailPageState();
+  _SerieDetailPageState createState() => _SerieDetailPageState();
 }
 
-class _MovieDetailPageState extends State<MovieDetailPage>{
-  final _controller = MovieDetailController();
-  late var listFilm = [];
-  late var listMovieAssisted = [];
+class _SerieDetailPageState extends State<SerieDetailPage>{
+  final _controller = SerieDetailController();
+  late var listSerie = [];
+  late var listSerieAssisted = [];
 
   @override
   void initState(){
@@ -34,7 +35,7 @@ class _MovieDetailPageState extends State<MovieDetailPage>{
     setState(() {
       _controller.loading = true;
     });
-    await _controller.fetchMovieBydId(widget.movieId);
+    await _controller.fetchMovieBydId(widget.serieID);
 
     setState(() {
       _controller.loading = false;
@@ -51,7 +52,7 @@ class _MovieDetailPageState extends State<MovieDetailPage>{
 
   _buildAppBar() {
     return AppBar(
-      title: Text(_controller.movieDetail?.title ?? ""),
+      title: Text(_controller.serieDetail?.title ?? ""),
     );
   }
 
@@ -59,8 +60,8 @@ class _MovieDetailPageState extends State<MovieDetailPage>{
     if(_controller.loading){
       return CenteredProgress();
     }
-    if(_controller.movieError != null){
-      return CenteredMessage(message: _controller.movieError!.message);
+    if(_controller.serieError != null){
+      return CenteredMessage(message: _controller.serieError!.message);
     }
 
    return ListView(
@@ -76,7 +77,7 @@ class _MovieDetailPageState extends State<MovieDetailPage>{
     return Container(
       padding: const EdgeInsets.fromLTRB(10,0, 10, 10),
       child: Text(
-        _controller.movieDetail!.overview,
+        _controller.serieDetail!.overview,
         textAlign:  TextAlign.justify,
         style: Theme.of(context).textTheme.bodyText2,
       ),
@@ -89,8 +90,7 @@ class _MovieDetailPageState extends State<MovieDetailPage>{
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Rate(_controller.movieDetail!.voteAverage),
-          ChipDate(date: _controller.movieDetail!.releaseDate),
+          Rate(_controller.serieDetail!.voteAverage),
           IconButton(onPressed:add,icon: Icon(Icons.add)),
           IconButton(onPressed:assisted,icon: Icon(Icons.check))
         ],
@@ -102,33 +102,74 @@ class _MovieDetailPageState extends State<MovieDetailPage>{
     _onClickAdd(context);
   }
 
-  //Metodo que chama o "add", colocando um novo filme na lista
-  _onClickAdd(BuildContext context) {
-    var sizeList = listFilm.length;
+  assisted(){
+    _onClickAssisted(context);
+  }
+  _onClickAssisted(BuildContext context) {
+    var sizeList = listSerieAssisted.length;
     String str;
-    if(_controller.movieDetail!.title.length > 27){
-      str = _controller.movieDetail!.title.substring(0,27);
+    if(_controller.serieDetail!.title.length > 33){
+      str = _controller.serieDetail!.title.substring(0, 33);
     }
     else{
-      str = _controller.movieDetail!.title;
+      str = _controller.serieDetail!.title;
     }
-
-    if (this.listFilm.contains(str)) {
+    if (this.listSerieAssisted.contains(str)) {
       Navigator.pop(context);
       showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text("Não podemos ter o mesmo filmes 2 vezes na lista!"),
+              title: Text("Serie ja foi assistida!!"),
             );
           });
-    } else if(this.listMovieAssisted.contains(str)){
+    } else if(this.listSerie.contains(str)){
       Navigator.pop(context);
       showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text("Filme ja foi assistido!"),
+              title: Text("Serie já esta na sua lista!"),
+            );
+          });
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) {
+
+            _incrementCounterAssisted(str);
+            return AlertDialog(
+              title: Text("Adicionado a lista de series assistidas!"),
+            );
+          });
+    }
+  }
+  //Metodo que chama o "add", colocando um novo filme na lista
+  _onClickAdd(BuildContext context) {
+    var sizeList = listSerie.length;
+    String str;
+    if(_controller.serieDetail!.title.length > 33){
+      str = _controller.serieDetail!.title.substring(0, 33);
+    }
+    else{
+      str = _controller.serieDetail!.title;
+    }
+    if (this.listSerie.contains(str)) {
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Não podemos ter a mesma serie 2 vezes na lista!"),
+            );
+          });
+    } else if(this.listSerieAssisted.contains(str)){
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Serie ja foi assistida!"),
             );
           });
     }else {
@@ -143,86 +184,45 @@ class _MovieDetailPageState extends State<MovieDetailPage>{
       _reloadList();
     }
   }
-  assisted(){
-    _onClickAssisted(context);
-  }
-  _onClickAssisted(BuildContext context) {
-    var sizeList = listMovieAssisted.length;
-    String str;
-    if(_controller.movieDetail!.title.length > 27){
-      str = _controller.movieDetail!.title.substring(0,27);
-    }
-    else{
-      str = _controller.movieDetail!.title;
-    }
-    if (this.listMovieAssisted.contains(str)) {
-      Navigator.pop(context);
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Filme ja foi assistido!"),
-            );
-          });
-    } else if(this.listFilm.contains(str)){
-      Navigator.pop(context);
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Filme já esta na sua lista!"),
-            );
-          });
-    }else {
-      showDialog(
-          context: context,
-          builder: (context) {
-            _incrementCounterAssisted(str);
-            return AlertDialog(
-              title: Text("Adicionado a lista de filmes assistidos!"),
-            );
-          });
-    }
-  }
 
   Future<void> _reloadList() async {
-    var newList = await Future.delayed(Duration(seconds: 0), () => listFilm);
-    var newListMovie = await Future.delayed(Duration(seconds: 0), () => listMovieAssisted);
+    var newList = await Future.delayed(Duration(seconds: 0), () => listSerie);
+    var newListSerie = await Future.delayed(Duration(seconds: 0), () => listSerieAssisted);
     setState(() {
-      listFilm = newList;
-      listMovieAssisted = newListMovie;
+      listSerie = newList;
+      listSerieAssisted = newListSerie;
     });
   }
 
   _initList() async{
     SharedPreferences listPrefs = await SharedPreferences.getInstance();
     SharedPreferences listPrefsAssisted = await SharedPreferences.getInstance();
-    this.listFilm = listPrefs.getStringList("counter")!.cast<dynamic>();
-    this.listMovieAssisted = listPrefs.getStringList("counterFilmAssisted")!.cast<dynamic>();
+    this.listSerie = listPrefs.getStringList("counterSerie")!.cast<dynamic>();
+    this.listSerieAssisted = listPrefs.getStringList("counterSerieAssisted")!.cast<dynamic>();
     _reloadList();
 
-  }
-
-  _incrementCounterAssisted(String name) async {
-    SharedPreferences prefsAssisted = await SharedPreferences.getInstance();
-    SharedPreferences listPrefsAssisted = await SharedPreferences.getInstance();
-    prefsAssisted.setString('counterFilmAssisted', name);
-    this.listMovieAssisted.add(prefsAssisted.get('counterFilmAssisted'));
-    var listFilmString = listMovieAssisted.cast<String>();
-    listPrefsAssisted.setStringList('counterFilmAssisted', listFilmString);
   }
 
 _incrementCounter(String name) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   SharedPreferences listPrefs = await SharedPreferences.getInstance();
-  prefs.setString('counter', name);
-  this.listFilm.add(prefs.get('counter'));
-  var listFilmString = listFilm.cast<String>();
-  listPrefs.setStringList('counter', listFilmString);
+  prefs.setString('counterSerie', name);
+  this.listSerie.add(prefs.get('counterSerie'));
+  var listFilmString = listSerie.cast<String>();
+  listPrefs.setStringList('counterSerie', listFilmString);
 
 }
 
+  _incrementCounterAssisted(String name) async {
+    SharedPreferences prefsAssisted = await SharedPreferences.getInstance();
+    SharedPreferences listPrefsAssisted = await SharedPreferences.getInstance();
+    prefsAssisted.setString('counterSerieAssisted', name);
+    this.listSerieAssisted.add(prefsAssisted.get('counterSerieAssisted'));
+    var listFilmString = listSerieAssisted.cast<String>();
+    listPrefsAssisted.setStringList('counterSerieAssisted', listFilmString);
+  }
+
  _buildCover(){
-    return Image.network('https://image.tmdb.org/t/p/w500${_controller.movieDetail!.backdropPath}',);
+    return Image.network('https://image.tmdb.org/t/p/w500${_controller.serieDetail!.backdropPath}',);
  }
 }
