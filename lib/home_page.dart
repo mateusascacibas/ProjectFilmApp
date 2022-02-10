@@ -1,10 +1,14 @@
 
 
 import 'package:filmproject/movie_page.dart';
+import 'package:filmproject/serie_page.dart';
 import 'package:filmproject/widgets/button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:i18n_extension/i18n_extension.dart';
 import 'dart:math';
+import 'package:i18n_extension/i18n_widget.dart';
 import 'package:sqflite/sqflite.dart';
 import 'controllers/movie_popular.dart';
 
@@ -26,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   late var film = 0;
   late var cont = 11;
   late var listFilm = [];
+  late var listFilmAssisted = [];
   final myController = TextEditingController();
 
 
@@ -34,68 +39,70 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     listFilmPage(context, this.listFilm);
     return DefaultTabController(
-      length: 3,
-      child: Scaffold(
+        length: 4,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("Filme de Hoje"),
+            bottom: TabBar(
+              tabs: [
+                Tab(
+                  text: "Sorteio",
+                ),
+                Tab(text: "Lista"),
+                Tab(text: "Populares"),
+                Tab(text: "Assistidos"),
 
-        appBar: AppBar(
-          title: Text("Filme de Hoje"),
-          bottom: TabBar(
-            tabs: [
-              Tab(
-                text: "Sorteio",
-              ),
-              Tab(text: "Lista"),
-              Tab(text: "Populares"),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            children: <Widget>[
+              _body(context),
+              listFilmPage(context,this.listFilm),
+              MoviePage(),
+              listFilmAssistedPage(context, this.listFilmAssisted)
 
+              //_tab2(),
             ],
           ),
-        ),
-        body: TabBarView(
-          children: <Widget>[
-            _body(context),
-            listFilmPage(context,this.listFilm),
-            MoviePage(),
-            //_tab2(),
-          ],
-        ),
-        floatingActionButton: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              child: Icon(Icons.add),
-              heroTag: "btn2",
-              onPressed: () {
-                showModalBottomSheet<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Container(
-                        height: MediaQuery.of(context).size.height * 0.6,
-                        color: Colors.lightBlueAccent,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 15),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Text(
-                                  "Digite o filme a ser adicionado: ",
-                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                ),
-                                _widgetTextField(),
-                                ElevatedButton(
-                                    child: const Text('Adicione'),
-                                    onPressed: () => _onClickAdd(context)),
-                              ],
+          floatingActionButton: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              FloatingActionButton(
+                child: Icon(Icons.add),
+                heroTag: "btn2",
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          color: Colors.lightBlueAccent,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 15),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Text(
+                                    "Digite o filme a ser adicionado: ",
+                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                  ),
+                                  _widgetTextField(),
+                                  ElevatedButton(
+                                      child: const Text('Adicione'),
+                                      onPressed: () => _onClickAdd(context)),
+                                ],
+                              ),
                             ),
-                          ),
-                      );
-                    });
-              },
-            ),
-          ],
+                        );
+                      });
+                },
+              ),
+            ],
+          ),
+          drawer: DrawerList(),
         ),
-        drawer: DrawerList(),
-      ),
     );
   }
 
@@ -187,6 +194,7 @@ class _HomePageState extends State<HomePage> {
   //Metodo que chama o "Remove", removendo um filme na lista
   _onClickRemove(index) {
     _removeCounter(index);
+    _removeCountAssisted(index);
     showDialog(
         context: context,
         builder: (context) {
@@ -194,6 +202,7 @@ class _HomePageState extends State<HomePage> {
             title: Text("Removido com sucesso!"),
           );
         });
+    myController.text = "";
     _reloadList();
   }
 
@@ -225,6 +234,7 @@ class _HomePageState extends State<HomePage> {
               ),
           );
         });
+      myController.text = "";
       _reloadList();
   }
 
@@ -233,6 +243,12 @@ class _HomePageState extends State<HomePage> {
     this.listFilm.removeAt(index);
     var listFilmString = listFilm.cast<String>();
     listPrefs.setStringList('counter', listFilmString);
+  }
+  _removeCountAssisted(int index) async {
+    SharedPreferences listPrefsAssisted = await SharedPreferences.getInstance();
+    this.listFilmAssisted.removeAt(index);
+    var listFilmString = listFilmAssisted.cast<String>();
+    listPrefsAssisted.setStringList('counterFilmAssisted', listFilmString);
   }
 
   _editCounter(int index) async {
@@ -294,7 +310,7 @@ class _HomePageState extends State<HomePage> {
               title: Text("Por favor, preencha alguma coisa!"),
             );
           });
-    }else if(this.listFilm.contains(myController.text)){
+    }else if(this.listFilm.contains(myController.text) || this.listFilmAssisted.contains(myController.text)){
       Navigator.pop(context);
       showDialog(
           context: context,
@@ -324,7 +340,9 @@ class _HomePageState extends State<HomePage> {
 
   _initList() async{
     SharedPreferences listPrefs = await SharedPreferences.getInstance();
+    SharedPreferences listPrefsAssisted = await SharedPreferences.getInstance();
     this.listFilm = listPrefs.getStringList("counter")!.cast<dynamic>();
+    this.listFilmAssisted = listPrefsAssisted.getStringList("counterFilmAssisted")!.cast<dynamic>();
     _reloadList();
 
   }
@@ -340,12 +358,99 @@ class _HomePageState extends State<HomePage> {
       controller: myController,
       style: TextStyle(
           fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),
-      maxLength: 20,
+      maxLength: 27,
     );
   }
 
   /////////////////////////////////////////////////////////////////////////////////
   //Carrega a lista de filmes
+  listFilmAssistedPage(BuildContext context, List list) {
+    _initList();
+    var tem = this.listFilmAssisted.length == 0;
+    return tem ? Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        child: RefreshIndicator(
+          onRefresh: _reloadList,
+          child: ListView.builder(
+            itemExtent: 50,
+            itemCount: 1,
+            itemBuilder: (context, itemCount) {
+              return Text("Ainda nao assistiu nenhum filme.",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),);
+            },
+          ),
+        ),
+      ),
+    ) : Container(
+      child: RefreshIndicator(
+        onRefresh: _reloadList,
+        child: ListView.builder(
+          itemExtent: 50,
+          itemCount: this.listFilmAssisted.length,
+          itemBuilder: (context, itemCount) {
+            return _listFilmAssisted(this.listFilmAssisted, itemCount);
+          },
+        ),
+      ),
+    );
+  }
+
+  _listFilmAssisted(List tvs, int index) {
+    if (index < this.listFilmAssisted.length) {
+      return Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration( //                    <-- BoxDecoration
+              border: Border(bottom: BorderSide()),
+            ),
+            child: Padding(
+
+              padding: const EdgeInsets.all(7.0),
+              child: Text(
+                listFilmAssisted[index],
+                textAlign: TextAlign.justify,
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black45,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            child: Row(
+              children: [
+                IconButton(
+                    icon: Icon(Icons.delete_forever),
+                    iconSize: 30.0,
+                    onPressed: () => _onClickRemove(index),
+                    padding: EdgeInsets.only(left: 280)
+                ),
+              ],
+            ),
+          ),
+
+        ],
+      );
+    }else{
+      return Text("");
+    }
+  }
+
   listFilmPage(BuildContext context, List list) {
     _initList();
     var tem = this.listFilm.length == 0;
@@ -399,7 +504,7 @@ class _HomePageState extends State<HomePage> {
                 listFilm[index],
                 textAlign: TextAlign.justify,
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: 18,
                 ),
               ),
             ),
@@ -422,13 +527,19 @@ class _HomePageState extends State<HomePage> {
                       icon: Icon(Icons.edit),
                       iconSize: 30.0,
                       onPressed: () => _onClickEdit(index),
-                      padding: EdgeInsets.only(left: 280.0)
+                      padding: EdgeInsets.only(left: 265.0)
                   ),
                   IconButton(
                       icon: Icon(Icons.delete_forever),
                       iconSize: 30.0,
                       onPressed: () => _onClickRemove(index),
-                      padding: EdgeInsets.only(left: 10.0)
+                      padding: EdgeInsets.only(left: 0.01)
+                  ),
+                  IconButton(
+                      icon: Icon(Icons.check),
+                      iconSize: 25.0,
+                      onPressed: () => _onClickAssisted(index),
+                      padding: EdgeInsets.only(left: 0)
                   ),
 
                 ],
@@ -441,11 +552,53 @@ class _HomePageState extends State<HomePage> {
       return Text("");
     }
   }
+  _onClickAssisted(index) async {
+    SharedPreferences listPrefsMovie = await SharedPreferences.getInstance();
+    var sizeList = listFilmAssisted.length;
+    String str;
+    if (this.listFilmAssisted.contains(this.listFilm[index])) {
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Não podemos ter o mesmo filme 2 vezes na lista!"),
+            );
+          });
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) {
+            if (this.listFilm[index].length > 27) {
+              str = this.listFilm[index].substring(0, 27);
+            }
+            else {
+              str = this.listFilm[index];
+            }
+            _incrementCounterAssisted(str);
+            _removeCounter(index);
+            return AlertDialog(
+              title: Text("Adicionado a lista de filmes assistidos!"),
+            );
+          });
+    }
+    _reloadList();
+  }
 
+  _incrementCounterAssisted(String name) async {
+    SharedPreferences prefsAssisted = await SharedPreferences.getInstance();
+    SharedPreferences listPrefsAssisted = await SharedPreferences.getInstance();
+    prefsAssisted.setString('counterFilmAssisted', name);
+    this.listFilmAssisted.add(prefsAssisted.get('counterFilmAssisted'));
+    var listFilmString = listFilmAssisted.cast<String>();
+    listPrefsAssisted.setStringList('counterFilmAssisted', listFilmString);
+  }
   Future<void> _reloadList() async {
     var newList = await Future.delayed(Duration(seconds: 0), () => listFilm);
+    var newListFilm = await Future.delayed(Duration(seconds: 0), () => listFilmAssisted);
     setState(() {
       listFilm = newList;
+      listFilmAssisted = newListFilm;
     });
   }
 }
