@@ -6,9 +6,7 @@ import 'package:filmproject/widgets/button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:i18n_extension/i18n_extension.dart';
 import 'dart:math';
-import 'package:i18n_extension/i18n_widget.dart';
 import 'package:sqflite/sqflite.dart';
 import 'controllers/movie_popular.dart';
 

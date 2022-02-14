@@ -33,7 +33,7 @@ class SerieControllerSearch {
     movieError = null;
     movieResponseModel = null;
     final _controller = SerieDetailController();
-    final result = await _repository.fetchAllMovies();
+    final result = await _repository.fetchAllMovies(page);
     result.fold((error) => movieError = error, (movie) {
       if (_controller.serieDetail!.title.contains(text)) {
         movieResponseModel = movie;

@@ -16,6 +16,9 @@ class SerieController {
 
   List<SerieModel> get movies => serieResponseModel?.movies ?? <SerieModel>[];
 
+  // set moviesCounts(int movies){
+  //   moviesCounts -= movies;
+  // }
   int get moviesCounts => movies.length;
 
   bool get hasMovies => moviesCounts != 0;
@@ -24,10 +27,10 @@ class SerieController {
 
   int get currentPage => serieResponseModel?.page ?? 1;
 
-  Future<Either<MovieError, SerieResponseModel>> fetchAllMovies() async {
+  Future<Either<MovieError, SerieResponseModel>> fetchAllMovies(int page) async {
     movieError = null;
     serieResponseModel = null;
-    final result = await _repository.fetchAllMovies();
+    final result = await _repository.fetchAllMovies(page);
     result.fold((error) => movieError = error, (movie) {
       if (serieResponseModel == null) {
         serieResponseModel = movie;

@@ -32,7 +32,7 @@ class SerieModel{
   factory SerieModel.fromMap(Map<String, dynamic> json) =>  SerieModel(
     popularity: json["popularity"].toDouble(),
     voteCount: json["vote_count"],
-    posterPath: json["backdrop_path"],
+    posterPath: json["poster_path"],
     id: json["id"],
     backdropPath: json["backdrop_path"],
     originalLanguage: json["original_language"],

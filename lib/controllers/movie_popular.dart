@@ -21,8 +21,7 @@ class MovieController {
 
   int get currentPage => movieResponseModel?.page ?? 1;
 
-  Future<Either<MovieError, MovieResponseModel>> fetchAllMovies(
-      {int page = 1}) async {
+  Future<Either<MovieError, MovieResponseModel>> fetchAllMovies(int page) async {
     movieError = null;
     movieResponseModel = null;
     final result = await _repository.fetchAllMovies(page);

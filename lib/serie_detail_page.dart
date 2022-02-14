@@ -108,8 +108,8 @@ class _SerieDetailPageState extends State<SerieDetailPage>{
   _onClickAssisted(BuildContext context) {
     var sizeList = listSerieAssisted.length;
     String str;
-    if(_controller.serieDetail!.title.length > 33){
-      str = _controller.serieDetail!.title.substring(0, 33);
+    if(_controller.serieDetail!.title.length > 23){
+      str = _controller.serieDetail!.title.substring(0, 23);
     }
     else{
       str = _controller.serieDetail!.title;
@@ -148,8 +148,8 @@ class _SerieDetailPageState extends State<SerieDetailPage>{
   _onClickAdd(BuildContext context) {
     var sizeList = listSerie.length;
     String str;
-    if(_controller.serieDetail!.title.length > 33){
-      str = _controller.serieDetail!.title.substring(0, 33);
+    if(_controller.serieDetail!.title.length > 23){
+      str = _controller.serieDetail!.title.substring(0, 23);
     }
     else{
       str = _controller.serieDetail!.title;
@@ -223,6 +223,11 @@ _incrementCounter(String name) async {
   }
 
  _buildCover(){
-    return Image.network('https://image.tmdb.org/t/p/w500${_controller.serieDetail!.backdropPath}',);
+    if(_controller.serieDetail!.backdropPath == null){
+      return Image.network('https://image.tmdb.org/t/p/w500${_controller.serieDetail!.posterPath}',);
+    }
+    else{
+      return Image.network('https://image.tmdb.org/t/p/w500${_controller.serieDetail!.backdropPath}',);
+    }
  }
 }

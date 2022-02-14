@@ -3,9 +3,7 @@ import 'package:filmproject/widgets/button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:i18n_extension/i18n_extension.dart';
 import 'dart:math';
-import 'package:i18n_extension/i18n_widget.dart';
 import 'package:sqflite/sqflite.dart';
 import 'controllers/movie_popular.dart';
 
@@ -193,14 +191,19 @@ class _LoadingSerie extends State<LoadingSerie> {
   }
 
   //Metodo que chama o "Remove", removendo um tve na lista
-  _onClickRemove(index) {
-    _removecounterSerie(index);
-    _removecounterSerieAssisted(index);
+  _onClickRemove(index, String type) {
+    if(type == "assisted"){
+      _removecounterSerieAssisted(index);
+    }else{
+      _removecounterSerie(index);
+    }
+
+
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text("Removido com sucesso!"),
+            title: Text("Removida com sucesso!"),
           );
         });
     myController.text = "";
@@ -217,7 +220,7 @@ class _LoadingSerie extends State<LoadingSerie> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text("Não podemos ter o mesmo filmes 2 vezes na lista!"),
+              title: Text("Não podemos ter a mesma serie 2 vezes na lista!"),
             );
           });
     } else {
@@ -404,7 +407,7 @@ class _LoadingSerie extends State<LoadingSerie> {
       controller: myController,
       style: TextStyle(
           fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),
-      maxLength: 27,
+      maxLength: 23,
     );
   }
 
@@ -519,7 +522,7 @@ class _LoadingSerie extends State<LoadingSerie> {
                   IconButton(
                       icon: Icon(Icons.delete_forever),
                       iconSize: 30.0,
-                      onPressed: () => _onClickRemove(index),
+                      onPressed: () => _onClickRemove(index, "assisted"),
                       padding: EdgeInsets.only(left: 280)
                   ),
                 ],
@@ -573,12 +576,12 @@ class _LoadingSerie extends State<LoadingSerie> {
                     icon: Icon(Icons.edit),
                     iconSize: 30.0,
                     onPressed: () => _onClickEdit(index),
-                    padding: EdgeInsets.only(left: 265.0)
+                    padding: EdgeInsets.only(left: 230.0)
                 ),
                 IconButton(
                     icon: Icon(Icons.delete_forever),
                     iconSize: 30.0,
-                    onPressed: () => _onClickRemove(index),
+                    onPressed: () => _onClickRemove(index, "counter"),
                     padding: EdgeInsets.only(left: 0.1)
                 ),
                 IconButton(

@@ -11,7 +11,7 @@ class MovieRepository{
 
   Future<Either<MovieError, MovieResponseModel>> fetchAllMovies(int page) async{
     try {
-      final response = await _dio.get('/movie/popular?page=${page}?api_key=b6f5ab1fe6c171a61e5fb12a5a0b4efa');
+      final response = await _dio.get('/movie/popular?api_key=b6f5ab1fe6c171a61e5fb12a5a0b4efa&page=$page');
       final model = MovieResponseModel.fromMap(response.data);
       return Right(model);
     } on DioError catch (error){

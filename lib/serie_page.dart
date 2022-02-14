@@ -1,13 +1,12 @@
-import 'package:filmproject/controllers/movie_search.dart';
+
+import 'package:filmproject/devProfile.dart';
 import 'package:filmproject/serie_detail_page.dart';
 import 'package:filmproject/widgets/centered_message.dart';
 import 'package:filmproject/widgets/centered_progress.dart';
-import 'package:filmproject/widgets/movie_card.dart';
+import 'package:filmproject/widgets/models/tv_card.dart';
 import 'package:flutter/material.dart';
 
 import 'controllers/serie_popular.dart';
-import 'controllers/serie_search.dart';
-import 'core/constanst.dart';
 
 class SeriePage extends StatefulWidget{
   @override
@@ -17,7 +16,7 @@ class SeriePage extends StatefulWidget{
 class _MoviePageState extends State<SeriePage>{
   final _controller = SerieController();
   final _scrollController = ScrollController();
-  final _controllerSearch = SerieControllerSearch();
+  int cont = 0;
   Icon customIcon = const Icon(Icons.search);
   Widget customSearchBar = const Text('Series');
   int lastPage = 1;
@@ -33,7 +32,7 @@ class _MoviePageState extends State<SeriePage>{
     _scrollController.addListener(() async{
       if(_scrollController.offset >= _scrollController.position.maxScrollExtent){
           lastPage++;
-          await _controller.fetchAllMovies();
+          await _controller.fetchAllMovies(lastPage);
           setState(() {
           });
         }
@@ -42,10 +41,11 @@ class _MoviePageState extends State<SeriePage>{
 
   _initialize() async{
     setState(() {
+      lastPage = 1;
       _controller.loading = true;
     });
 
-    await _controller.fetchAllMovies();
+    await _controller.fetchAllMovies(lastPage);
 
     setState(() {
       _controller.loading = false;
@@ -55,19 +55,26 @@ class _MoviePageState extends State<SeriePage>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       //appBar: _buildAppBar() ,
+       appBar: _buildAppBar() ,
       body: _buildMovieGrid(),
     );
   }
 
-  // _buildAppBar(){
-  //   return AppBar(
-  //     title: Text(kAppName),
-  //     actions: [
-  //       IconButton(onPressed: _initialize, icon: Icon(Icons.refresh))
-  //     ],
-  //   );
-  // }
+  _buildAppBar(){
+    return AppBar(
+      title: Text("Serie de hoje?"),
+
+      // title: TextField(
+      //   decoration:
+      //   InputDecoration(border: InputBorder.none, hintText: 'Search'),
+      // ),
+      actions: [
+        IconButton(onPressed: _back, icon: Icon(Icons.arrow_left)),
+        IconButton(onPressed: _next, icon: Icon(Icons.arrow_right)),
+        IconButton(onPressed: _initialize, icon: Icon(Icons.refresh))
+      ],
+    );
+  }
 
   // _buildAppBar() {
   //  return AppBar(
@@ -118,7 +125,7 @@ class _MoviePageState extends State<SeriePage>{
       return CenteredMessage(message: _controller.movieError!.message);
     }
 
-    return GridView.builder(controller: _scrollController,
+    return GridView.builder(
         padding: const EdgeInsets.all(2.0),
         itemCount: _controller.moviesCounts,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -133,14 +140,56 @@ class _MoviePageState extends State<SeriePage>{
 
   Widget _buildMovieCard(BuildContext context, int index) {
     final movie = _controller.movies[index];
-    return MovieCard(
-      posterPath: movie.posterPath,
-      onTap: () => _openDetailPage(movie.id),
-    );
+    var response;
+    if(movie.posterPath == null && movie.backdropPath == null){
+     response =  "assets/images/mateus.jpg";
+    }
+    else{
+      response = movie.posterPath == null? movie.backdropPath: movie.posterPath;
+    }
+      return TvCard(
+        posterPath: response,
+        onTap: () => response == "assets/images/mateus.jpg" ? _openDevProfile() : _openDetailPage(movie.id),
+      );
   }
 
   _openDetailPage(int id) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => SerieDetailPage(id)));
   }
+  _openDevProfile() {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => devProfile()));
+  }
+
+  Future<void> _back() async {
+    setState(() {
+      lastPage -= 1;
+      _controller.loading = true;
+    });
+
+    await _controller.fetchAllMovies(lastPage);
+
+    setState(() {
+      _controller.loading = false;
+    });
+
+  }
+
+  Future<void> _next() async {
+    setState(() {
+      lastPage += 1;
+      _controller.loading = true;
+    });
+
+    await _controller.fetchAllMovies(lastPage);
+
+    setState(() {
+      _controller.loading = false;
+    });
+
+  }
+
+
+
 }

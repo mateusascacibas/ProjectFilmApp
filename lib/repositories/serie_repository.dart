@@ -12,9 +12,9 @@ import '../widgets/models/movie_response_model.dart';
 class SerieRepository{
   final Dio _dio = Dio(kDioOptions);
 
-  Future<Either<MovieError, SerieResponseModel>> fetchAllMovies() async{
+  Future<Either<MovieError, SerieResponseModel>> fetchAllMovies(int page) async{
     try {
-      final response = await _dio.get('/tv/popular?api_key=b6f5ab1fe6c171a61e5fb12a5a0b4efa');
+      final response = await _dio.get('/tv/popular/?api_key=b6f5ab1fe6c171a61e5fb12a5a0b4efa&language=pt-BR&page=$page');
       final model = SerieResponseModel.fromMap(response.data);
       return Right(model);
     } on DioError catch (error){
