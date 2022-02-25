@@ -525,7 +525,7 @@ class _HomePageState extends State<HomePage> {
                       icon: Icon(Icons.edit),
                       iconSize: 30.0,
                       onPressed: () => _onClickEdit(index),
-                      padding: EdgeInsets.only(left: 265.0)
+                      padding: EdgeInsets.only(left: 230.0)
                   ),
                   IconButton(
                       icon: Icon(Icons.delete_forever),
@@ -567,8 +567,8 @@ class _HomePageState extends State<HomePage> {
       showDialog(
           context: context,
           builder: (context) {
-            if (this.listFilm[index].length > 27) {
-              str = this.listFilm[index].substring(0, 27);
+            if (this.listFilm[index].length > 21) {
+              str = this.listFilm[index].substring(0, 21);
             }
             else {
               str = this.listFilm[index];

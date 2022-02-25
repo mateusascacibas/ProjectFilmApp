@@ -183,6 +183,7 @@ class _MovieDetailPageState extends State<MovieDetailPage>{
             );
           });
     }
+    _reloadList();
   }
 
   Future<void> _reloadList() async {

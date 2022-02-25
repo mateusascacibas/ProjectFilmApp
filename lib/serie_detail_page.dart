@@ -143,13 +143,14 @@ class _SerieDetailPageState extends State<SerieDetailPage>{
             );
           });
     }
+    _reloadList();
   }
   //Metodo que chama o "add", colocando um novo filme na lista
   _onClickAdd(BuildContext context) {
     var sizeList = listSerie.length;
     String str;
-    if(_controller.serieDetail!.title.length > 23){
-      str = _controller.serieDetail!.title.substring(0, 23);
+    if(_controller.serieDetail!.title.length > 21){
+      str = _controller.serieDetail!.title.substring(0, 21);
     }
     else{
       str = _controller.serieDetail!.title;
